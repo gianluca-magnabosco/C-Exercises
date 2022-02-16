@@ -35,7 +35,16 @@ void main(){
     }
     
     media = (nota1 + nota2) / 2;
-    printf("Sua media eh: %d\n\n", media);
+    printf("\nSua media do semestre foi: %d\n", media);
+    
+    if (media < 40)
+        printf("Voce esta reprovado!\n\n");  
+
+    if (media >= 40 && media < 70)
+        printf("Voce esta de exame!\n\n");
+
+    if (media >= 70)
+        printf("Voce foi aprovado!\n\n");
 
     system("pause");
 
