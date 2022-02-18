@@ -20,4 +20,5 @@ void main(){
     printf("\n Media: %f \n\n",media);
     system("pause");
 
+
 }
