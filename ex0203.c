@@ -3,25 +3,20 @@
 
 
 void main(){
-    int i,j,num;
-    float media,total;
-    int vet[1000];
-    i = 0;
+    int i = 0, j, num;
+    float media,sum = 0;
 
     do{
         printf(" Insira um numero positivo: ");
         scanf("%d", &num);
-        vet[i] = num;
-        i++;
+        if(num>=0){
+            sum += num;
+            i++;
+        }
     }while(num >= 0);
 
-    i -= 1;
-    
-    for(j=0; j<i; j++){
-        total = total + vet[j];
-    }
 
-    media = total/i;
+    media = (sum/i);
     printf("\n Media: %f \n\n",media);
     system("pause");
 
