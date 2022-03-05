@@ -7,20 +7,21 @@ char questoes[9][7], gabarito[7];
 void main(){
 
 
-    printf("Digite o gabarito da prova: ");
+    printf("Digite o gabarito da prova: \n");
     for (i = 0; i < 8; i++){
-        printf("Questão %d: ", i+1);
-        scanf("%c", gabarito[i]);
+        printf("Questao %d: ", i+1);
+        scanf("%c%*c", &gabarito[i]);
+        printf("%c", gabarito[i]);
     }
 
     for (j = 0; j < 10; j++){
         printf("Digite o numero do aluno: ");
-        scanf("%d", num_aluno[j]);
+        scanf("%d", &num_aluno[j]);
     
         printf("Digite o gabarito do aluno %d: ", num_aluno[j]);
         for (i = 0; i < 8; i++){
-            printf("\nQuestão %d: ", i+1);
-            scanf("%c", questoes[j][i]);
+            printf("\nQuestao %d: ", i+1);
+            scanf("%*c%c", &questoes[j][i]);
             if (questoes[j][i] == gabarito[i]){
                 nota++;
                 
