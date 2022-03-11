@@ -8,6 +8,7 @@ void main(){
     pa = &a;
     pb = &b;
     c = 3 * (*pb - *pa); 
+    printf("%x\n%x\n%x\n%x\n%f\n%x\n%x\n%f\n%f\n", &a, &b, &c, pa, *pa, &(*pa), pb, *pb, a);
 }
 
 /*
@@ -21,7 +22,7 @@ c) Qual valor é assinalado a &c? -----------> 1138
 d) Qual valor é assinalado a pa? -----------> 1130
 e) Qual valor é representado por *pa? ------> 0.001
 f) Qual valor é representado por &(*pa)? ---> 1130
-g) Qual valor é assinalado a pb? -----------> 1144
+g) Qual valor é assinalado a pb? -----------> 1134
 h) Qual valor é representado por *pb? ------> 0.003 
 i) Qual valor é assinalado a a -------------> 0.001
 */
