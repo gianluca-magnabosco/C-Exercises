@@ -99,6 +99,8 @@ int menu(){
                 
             } while ((nivel != 1) || (nivel != 2) || (nivel != 3));
 
+            inicializa_velha();
+
             break;
         }
 
@@ -159,7 +161,9 @@ void escolha_simb(char *jog1, char *jog2){
 
 int jogada_usuario(int lin, int col, char jog){
     
-
+    if ((lin <= 3) && (col <= 3)){
+        
+    }
     tabuleiro[lin][col] = jog;
 
 
