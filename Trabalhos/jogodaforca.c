@@ -44,17 +44,17 @@ int menu(){
 
     // switch case do menu
     switch(opcao){
-    case 1:
-        comecarJogo();
-        break;
-    case 2:
-        listaPalavras();
-        break;
-    case 3:
-        break;
-    default:
-        printf("\nDigite uma opcao valida!\n\n");
-        opcao = menu();
+        case 1:
+            comecarJogo();
+            break;
+        case 2:
+            listaPalavras();
+            break;
+        case 3:
+            break;
+        default:
+            printf("\nDigite uma opcao valida!\n\n");
+            opcao = menu();
     }
 
     // retorno da funcao menu
