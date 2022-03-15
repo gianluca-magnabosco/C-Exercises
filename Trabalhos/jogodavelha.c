@@ -20,34 +20,72 @@ void main(){
     int opcao_selecionada;
     int lin = 0;
     int col = 0;
-    opcao_selecionada = menu();
-    nivel = opcao_selecionada - opcao;
+    int num_jogador = 0;
+    int ganhou = 0;
 
-    if (opcao == 1){
+    opcao_selecionada = menu();
+
+    if (opcao_selecionada == 1) {
         if (nivel == 1){
             // bot basico
+            escolha_simb(&jog1, &jog2);
+            inicializa_velha();
         }
         if (nivel == 2){
             // bot intermediario
+            escolha_simb(&jog1, &jog2);
+            inicializa_velha();
         }
         if (nivel == 3){
             // bot avancado
+            escolha_simb(&jog1, &jog2);
+            inicializa_velha();
         }
-    } else {
-        printf("\nDigite a posicao correspondente a sua jogada (formato: [linha coluna]): ");
-        scanf("%d %d", &lin, &col);
+    }
 
-        printf("%d %d\n", lin, col);
-        jog = 'O';
-        jogada_usuario(lin, col, jog);
-        // jogada usuario
+    if (opcao_selecionada == 2) {
+        escolha_simb(&jog1, &jog2);
+        inicializa_velha();
 
-        for (int i = 0; i < 3; i++){
-            for (int j = 0; j < 3; j++){
-                printf("%c", tabuleiro[i][j]);
-                if (j == 2){
-                    printf("\n");
-                }
+        for (int i = 0; i < 5; i++){
+            if (i % 2 == 0){
+                jog = jog1;
+                num_jogador = 1;
+            } else {
+                jog = jog2;
+                num_jogador = 2;
+            }
+            
+            printf("\nJogada do jogador %d (%c)", num_jogador, jog);
+            printf("\nDigite a posicao correspondente a sua jogada (formato: [linha coluna]): ");
+            scanf("%d %d", &lin, &col);
+
+            printf("%d %d\n", lin, col);
+
+            // jogada usuario
+            int aux = jogada_usuario(lin, col, jog);
+            printf("%d", aux);
+            
+            ///////// montar as mensagens de erro de acordo com o numero retornado pela funçao jogada_usuario
+
+
+
+            for (int i = 0; i < 3; i++){
+                for (int j = 0; j < 3; j++){
+                    printf("%c", tabuleiro[i][j]);
+                    if (j == 2){
+                        printf("\n");
+                    }
+            }
+
+            ganhou = verifica_ganhador(jog);
+            if(ganhou == 1){
+                printf("\n\nParabens jogador %d, voce venceu!!!", num_jogador);
+            } else {
+
+            }
+
+
         }
     }
     }
@@ -95,7 +133,6 @@ int menu(){
                     printf("\nDigite uma opcao valida!\n\n");
                 }
 
-
                 
             } while ((nivel != 1) || (nivel != 2) || (nivel != 3));
 
@@ -105,9 +142,6 @@ int menu(){
         }
 
         if (opcao == 2){
-            escolha_simb(&jog1, &jog2);
-            // jogada usuario
-            inicializa_velha();
             break;
         }
 
@@ -118,7 +152,7 @@ int menu(){
     } while ((opcao != 1) || (opcao != 2));
     
     // retorno da funcao menu
-    return (opcao + nivel);
+    return opcao;
 }
 
 void inicializa_velha(){
@@ -161,10 +195,29 @@ void escolha_simb(char *jog1, char *jog2){
 
 int jogada_usuario(int lin, int col, char jog){
     
-    if ((lin <= 3) && (col <= 3)){
-        
-    }
-    tabuleiro[lin][col] = jog;
+    if ((tabuleiro[lin][col] == 'O') || (tabuleiro[lin][col] == 'X')){
+        return 2;
+    }  
 
+
+    if ((lin > 2) || (lin < 0) || (col < 0) || (col > 2)){
+        return 1;
+    }
+
+    if ((lin < 3) && (col < 3) && (tabuleiro[lin][col] != 'O') && (tabuleiro[lin][col] != 'X')){
+        tabuleiro[lin][col] = jog;   
+        return 0;  
+    }
+
+}
+
+
+int verifica_ganhador(char jog){
+    if (1){
+        printf("\nMe faca");
+        return 1;
+    } else {
+        return 0;
+    }
 
 }
