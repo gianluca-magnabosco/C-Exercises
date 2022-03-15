@@ -22,6 +22,7 @@ void main(){
     int col = 0;
     int num_jogador = 0;
     int ganhou = 0;
+    int i = 0;
 
     opcao_selecionada = menu();
 
@@ -47,7 +48,8 @@ void main(){
         escolha_simb(&jog1, &jog2);
         inicializa_velha();
 
-        for (int i = 0; i < 5; i++){
+        do{
+            i++;
             if (i % 2 == 0){
                 jog = jog1;
                 num_jogador = 1;
@@ -62,9 +64,10 @@ void main(){
 
             printf("%d %d\n", lin, col);
 
+
             // jogada usuario
             int aux = jogada_usuario(lin, col, jog);
-            printf("%d", aux);
+            //printf("%d", aux);
             
             ///////// montar as mensagens de erro de acordo com o numero retornado pela funçao jogada_usuario
 
@@ -76,19 +79,19 @@ void main(){
                     if (j == 2){
                         printf("\n");
                     }
+                }
             }
+        
 
             ganhou = verifica_ganhador(jog);
-            if(ganhou == 1){
-                printf("\n\nParabens jogador %d, voce venceu!!!", num_jogador);
-            } else {
 
-            }
+        } while (ganhou != 1);
 
+        if(ganhou == 1){
+            printf("\n\n\nParabens jogador %d, voce venceu!!!", num_jogador);
+        } 
 
-        }
-    }
-    }
+    } 
 }
 
 int menu(){
@@ -118,25 +121,19 @@ int menu(){
                     printf("\nBot nivel basico\n");
                     break;
                 }
-
                 if (nivel == 2){
                     printf("\nBot nivel intermediario\n");
                     break;
                 }
-
                 if (nivel == 3){
                     printf("\nBot nivel avancado\n");
                     break;
                 }
-
                 if ((nivel != 1) && (nivel != 2) && (nivel != 3)){
                     printf("\nDigite uma opcao valida!\n\n");
                 }
-
-                
+    
             } while ((nivel != 1) || (nivel != 2) || (nivel != 3));
-
-            inicializa_velha();
 
             break;
         }
@@ -155,6 +152,7 @@ int menu(){
     return opcao;
 }
 
+
 void inicializa_velha(){
     for (int i = 0; i < 3; i++){
         for (int j = 0; j < 3; j++){
@@ -163,6 +161,7 @@ void inicializa_velha(){
         }
     }
 }
+
 
 void escolha_simb(char *jog1, char *jog2){
     int escolha = 0;
@@ -178,7 +177,6 @@ void escolha_simb(char *jog1, char *jog2){
             *jog2 = 'O';
             break;
         }
-
         if (escolha == 2){
             *jog1 = 'O';
             *jog2 = 'X';
@@ -199,7 +197,6 @@ int jogada_usuario(int lin, int col, char jog){
         return 2;
     }  
 
-
     if ((lin > 2) || (lin < 0) || (col < 0) || (col > 2)){
         return 1;
     }
@@ -208,16 +205,24 @@ int jogada_usuario(int lin, int col, char jog){
         tabuleiro[lin][col] = jog;   
         return 0;  
     }
-
 }
 
 
 int verifica_ganhador(char jog){
-    if (1){
-        printf("\nMe faca");
-        return 1;
-    } else {
-        return 0;
-    }
 
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if ((tabuleiro[i][j] == jog) && (tabuleiro[i][j+1] == jog) && (tabuleiro[i][j+2] == jog)){
+                return 1;
+            }
+            if ((tabuleiro[i][j] == jog) && (tabuleiro[i+1][j] == jog) && (tabuleiro[i+2][j] == jog)){
+                return 1;
+            }
+            if ((tabuleiro[i][j] == jog) && (tabuleiro[i+1][j+1] == jog) && (tabuleiro[i+2][j+2] == jog)){
+                return 1;
+            }
+        }
+    } 
+
+    return 0;
 }
