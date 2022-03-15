@@ -1,12 +1,16 @@
 # include <stdio.h>
 # include <stdlib.h>
 
+
+///////// 
 int jogada_usuario(int lin, int col, char jog);
 void jogada_computador(char jog, int nivel);
 int menu();
 void escolha_simb(char *jog1, char *jog2);
 void inicializa_velha();
 int verifica_ganhador(char jog);
+
+void imprimir_tabuleiro();
 
 char tabuleiro[3][3];
 int opcao = 0;
@@ -23,6 +27,7 @@ void main(){
     int num_jogador = 0;
     int ganhou = 0;
     int i = 0;
+    int jogada = 0;
 
     opcao_selecionada = menu();
 
@@ -49,7 +54,6 @@ void main(){
         inicializa_velha();
 
         do{
-            i++;
             if (i % 2 == 0){
                 jog = jog1;
                 num_jogador = 1;
@@ -57,32 +61,35 @@ void main(){
                 jog = jog2;
                 num_jogador = 2;
             }
-            
-            printf("\nJogada do jogador %d (%c)", num_jogador, jog);
-            printf("\nDigite a posicao correspondente a sua jogada (formato: [linha coluna]): ");
-            scanf("%d %d", &lin, &col);
 
-            printf("%d %d\n", lin, col);
+            i++;
 
-            // BOTAR CHAMADAS DE FUNÇAO EM LOOP ATE RETURN = 0
-            // jogada usuario
-            int aux = jogada_usuario(lin, col, jog);
-            //printf("%d", aux);
-            
-            ///////// montar as mensagens de erro de acordo com o numero retornado pela funçao jogada_usuario
+            do{ 
+                printf("\n");
+                imprimir_tabuleiro();           
+                printf("\nJogada do jogador %d (%c)", num_jogador, jog);
+                printf("\nDigite a posicao correspondente a sua jogada (formato: [linha coluna]): ");
+                scanf("%d %d", &lin, &col);
 
+                printf("%d %d\n", lin, col);
 
+                // jogada usuario
+                jogada = jogada_usuario(lin, col, jog);
 
-            for (int i = 0; i < 3; i++){
-                for (int j = 0; j < 3; j++){
-                    printf("%c ", tabuleiro[i][j]);
-                    if (j == 2){
-                        printf("\n");
-                    }
+                if (jogada == 1){
+                    printf("\n\nEssa posicao nao existe!!!");
+                    printf("\nInsira uma posicao real!\n");
                 }
-            }
-        
+                if (jogada == 2){
+                    printf("\n\nEssa posicao ja esta preenchida!!!");
+                    printf("\nInsira uma posicao disponivel!\n");
+                }
+            } while (jogada != 0);
 
+
+            imprimir_tabuleiro();
+
+        
             ganhou = verifica_ganhador(jog);
 
         } while (ganhou != 1);
@@ -221,35 +228,32 @@ int verifica_ganhador(char jog){
             if ((tabuleiro[i][j] == jog) && (tabuleiro[i+1][j+1] == jog) && (tabuleiro[i+2][j+2] == jog)){
                 return 1;
             }
+            if ((tabuleiro[2][0] == jog) && (tabuleiro[1][1] == jog) && (tabuleiro[0][2] == jog)){
+                return 1;
+            }
         }
     } 
 
     return 0;
 }
 
-
-
-
-
-
-
-
-
-
-//// POSSIVEL TABULEIRO
-/* 
-    printf("     |     |     \n");
-    printf("  %c  |  %c  |  %c \n", square[1], square[2], square[3]);
-
-    printf("_____|_____|_____\n");
-    printf("     |     |     \n");
-
-    printf("  %c  |  %c  |  %c \n", square[4], square[5], square[6]);
-
-    printf("_____|_____|_____\n");
-    printf("     |     |     \n");
-
-    printf("  %c  |  %c  |  %c \n", square[7], square[8], square[9]);
-
-    printf("     |     |     \n\n");
-*/
+void imprimir_tabuleiro(){
+    //for (int i = 0; i < 3; i++){
+    //    for (int j = 0; j < 3; j++){
+    //        printf("%c | ", tabuleiro[i][j]);
+    //        if (j == 2){
+    //            printf("\n");
+    //        }
+    //    }
+    //}
+    printf("     [0]   [1]   [2]  \n"); 
+    printf("         |     |     \n");
+    printf("[0]   %c  |  %c  |  %c \n", tabuleiro[0][0], tabuleiro[0][1], tabuleiro[0][2]);
+    printf("    _____|_____|_____\n");
+    printf("         |     |     \n");
+    printf("[1]   %c  |  %c  |  %c \n", tabuleiro[1][0], tabuleiro[1][1], tabuleiro[1][2]);
+    printf("    _____|_____|_____\n");
+    printf("         |     |     \n");
+    printf("[2]   %c  |  %c  |  %c \n", tabuleiro[2][0], tabuleiro[2][1], tabuleiro[2][2]);
+    printf("         |     |     \n\n");
+}
