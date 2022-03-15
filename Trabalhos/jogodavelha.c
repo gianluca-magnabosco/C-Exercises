@@ -64,7 +64,7 @@ void main(){
 
             printf("%d %d\n", lin, col);
 
-
+            // BOTAR CHAMADAS DE FUNÇAO EM LOOP ATE RETURN = 0
             // jogada usuario
             int aux = jogada_usuario(lin, col, jog);
             //printf("%d", aux);
