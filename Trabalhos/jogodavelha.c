@@ -1,8 +1,6 @@
 # include <stdio.h>
 # include <stdlib.h>
 
-
-///////// 
 int jogada_usuario(int lin, int col, char jog);
 void jogada_computador(char jog, int nivel);
 int menu();
@@ -11,16 +9,18 @@ void inicializa_velha();
 int verifica_ganhador(char jog);
 
 void imprimir_tabuleiro();
+int checar_velha();
+void tabela_posicoes();
 
 char tabuleiro[3][3];
 int opcao = 0;
 int nivel = 0;
-char jog1 = 'O';
-char jog2 = 'X';
+char jog1 = ' ';
+char jog2 = ' ';
 char jog = ' ';
 
 
-void main(){
+void main() {
     int opcao_selecionada;
     int lin = 0;
     int col = 0;
@@ -28,24 +28,28 @@ void main(){
     int ganhou = 0;
     int i = 0;
     int jogada = 0;
+    int velha = 0;
 
     opcao_selecionada = menu();
 
     if (opcao_selecionada == 1) {
-        if (nivel == 1){
+        if (nivel == 1) {
             // bot basico
             escolha_simb(&jog1, &jog2);
             inicializa_velha();
+            jogada_computador(jog2, nivel);
         }
-        if (nivel == 2){
+        if (nivel == 2) {
             // bot intermediario
             escolha_simb(&jog1, &jog2);
             inicializa_velha();
+            jogada_computador(jog2, nivel);
         }
-        if (nivel == 3){
+        if (nivel == 3) {
             // bot avancado
             escolha_simb(&jog1, &jog2);
             inicializa_velha();
+            jogada_computador(jog2, nivel);
         }
     }
 
@@ -54,7 +58,7 @@ void main(){
         inicializa_velha();
 
         do{
-            if (i % 2 == 0){
+            if (i % 2 == 0) {
                 jog = jog1;
                 num_jogador = 1;
             } else {
@@ -66,21 +70,23 @@ void main(){
 
             do{ 
                 printf("\n");
-                imprimir_tabuleiro();           
-                printf("\nJogada do jogador %d (%c)", num_jogador, jog);
+                if ((jogada != 1) && (jogada != 2)){
+                    imprimir_tabuleiro();  
+                }
+                printf("\nJogada do jogador %d (%c)\n", num_jogador, jog);
                 printf("\nDigite a posicao correspondente a sua jogada (formato: [linha coluna]): ");
                 scanf("%d %d", &lin, &col);
-
-                printf("%d %d\n", lin, col);
 
                 // jogada usuario
                 jogada = jogada_usuario(lin, col, jog);
 
-                if (jogada == 1){
+                if (jogada == 1) {
+                    imprimir_tabuleiro();
                     printf("\n\nEssa posicao nao existe!!!");
                     printf("\nInsira uma posicao real!\n");
                 }
-                if (jogada == 2){
+                if (jogada == 2) {
+                    imprimir_tabuleiro();
                     printf("\n\nEssa posicao ja esta preenchida!!!");
                     printf("\nInsira uma posicao disponivel!\n");
                 }
@@ -91,17 +97,28 @@ void main(){
 
         
             ganhou = verifica_ganhador(jog);
+            velha = checar_velha();
+            
+            if (velha == 1){
+                break;
+            }
 
         } while (ganhou != 1);
 
-        if(ganhou == 1){
-            printf("\n\n\nParabens jogador %d, voce venceu!!!", num_jogador);
+        if(ganhou == 1) {
+            imprimir_tabuleiro();
+            printf("\n\n\nParabens jogador %d (%c), voce venceu!!!", num_jogador, jog);
         } 
+
+        if ((velha == 1) && (ganhou != 1)) {
+            imprimir_tabuleiro();
+            printf("\n\n\nDeu velha! Ninguem venceu!");
+        }
 
     } 
 }
 
-int menu(){
+int menu() {
     // limpar tela
     system("cls");
 
@@ -110,11 +127,13 @@ int menu(){
         printf("\n\n-----------MENU PRINCIPAL-----------\n");
         printf("1- Jogar contra computador\n");
         printf("2- Jogar contra humano\n");
+        printf("3- Ver tabela de posicoes (Tutorial)\n");
         printf("\nSelecione a opcao desejada: ");
         scanf("%d", &opcao);
 
-        if (opcao == 1){
+        if (opcao == 1) {
             do{
+                system("cls");
                 printf("\n\nEscolhido: Jogar contra computador!\n\n");
                 printf("Niveis de dificuldade do computador:\n");
                 printf("1- Nivel basico\n");
@@ -123,20 +142,19 @@ int menu(){
                 printf("Escolha o nivel de dificuldade do computador: ");
                 scanf("%d", &nivel);
 
-
-                if (nivel == 1){
+                if (nivel == 1) {
                     printf("\nBot nivel basico\n");
                     break;
                 }
-                if (nivel == 2){
+                if (nivel == 2) {
                     printf("\nBot nivel intermediario\n");
                     break;
                 }
-                if (nivel == 3){
+                if (nivel == 3) {
                     printf("\nBot nivel avancado\n");
                     break;
                 }
-                if ((nivel != 1) && (nivel != 2) && (nivel != 3)){
+                if ((nivel != 1) && (nivel != 2) && (nivel != 3)) {
                     printf("\nDigite uma opcao valida!\n\n");
                 }
     
@@ -145,13 +163,19 @@ int menu(){
             break;
         }
 
-        if (opcao == 2){
+        if (opcao == 2) {
             break;
         }
 
-        if ((opcao != 1) && (opcao != 2)){
+        if (opcao == 3){
+            tabela_posicoes();
+            system("cls");
+        }
+
+        if ((opcao != 1) && (opcao != 2) && (opcao != 3)) {
             printf("\nDigite uma opcao valida!\n\n");
         }
+
 
     } while ((opcao != 1) || (opcao != 2));
     
@@ -160,9 +184,9 @@ int menu(){
 }
 
 
-void inicializa_velha(){
-    for (int i = 0; i < 3; i++){
-        for (int j = 0; j < 3; j++){
+void inicializa_velha() {
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
             tabuleiro[i][j] = ' ';
             printf("%c", tabuleiro[i][j]);
         }
@@ -170,27 +194,29 @@ void inicializa_velha(){
 }
 
 
-void escolha_simb(char *jog1, char *jog2){
+void escolha_simb(char *jog1, char *jog2) {
     int escolha = 0;
     do {
+        system("cls");
         printf("\n\nEscolha o simbolo desejado para cada jogador: \n");
         printf("1- Jogador 1 (X) vs Jogador 2 (O)\n");
         printf("2- Jogador 1 (O) vs Jogador 2 (X)\n");
-        printf("Insira uma opcao: ");
+        printf("\nInsira uma opcao: ");
         scanf("%d", &escolha);
 
-        if (escolha == 1){
+        if (escolha == 1) {
             *jog1 = 'X';
             *jog2 = 'O';
             break;
         }
-        if (escolha == 2){
+        if (escolha == 2) {
             *jog1 = 'O';
             *jog2 = 'X';
             break;
         }
 
-        if ((escolha != 1) && (escolha != 2)){
+
+        if ((escolha != 1) && (escolha != 2)) {
             printf("\nDigite uma opcao valida!\n\n");
         }
 
@@ -198,37 +224,37 @@ void escolha_simb(char *jog1, char *jog2){
 }
 
 
-int jogada_usuario(int lin, int col, char jog){
+int jogada_usuario(int lin, int col, char jog) {
     
-    if ((tabuleiro[lin][col] == 'O') || (tabuleiro[lin][col] == 'X')){
+    if ((tabuleiro[lin][col] == 'O') || (tabuleiro[lin][col] == 'X')) {
         return 2;
     }  
 
-    if ((lin > 2) || (lin < 0) || (col < 0) || (col > 2)){
+    if ((lin > 2) || (lin < 0) || (col < 0) || (col > 2)) {
         return 1;
     }
 
-    if ((lin < 3) && (col < 3) && (tabuleiro[lin][col] != 'O') && (tabuleiro[lin][col] != 'X')){
+    if ((lin < 3) && (col < 3) && (tabuleiro[lin][col] != 'O') && (tabuleiro[lin][col] != 'X')) {
         tabuleiro[lin][col] = jog;   
         return 0;  
     }
 }
 
 
-int verifica_ganhador(char jog){
+int verifica_ganhador(char jog) {
 
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            if ((tabuleiro[i][j] == jog) && (tabuleiro[i][j+1] == jog) && (tabuleiro[i][j+2] == jog)){
+            if ((tabuleiro[i][j] == jog) && (tabuleiro[i][j+1] == jog) && (tabuleiro[i][j+2] == jog)) {
                 return 1;
             }
-            if ((tabuleiro[i][j] == jog) && (tabuleiro[i+1][j] == jog) && (tabuleiro[i+2][j] == jog)){
+            if ((tabuleiro[i][j] == jog) && (tabuleiro[i+1][j] == jog) && (tabuleiro[i+2][j] == jog)) {
                 return 1;
             }
-            if ((tabuleiro[i][j] == jog) && (tabuleiro[i+1][j+1] == jog) && (tabuleiro[i+2][j+2] == jog)){
+            if ((tabuleiro[i][j] == jog) && (tabuleiro[i+1][j+1] == jog) && (tabuleiro[i+2][j+2] == jog)) {
                 return 1;
             }
-            if ((tabuleiro[2][0] == jog) && (tabuleiro[1][1] == jog) && (tabuleiro[0][2] == jog)){
+            if ((tabuleiro[2][0] == jog) && (tabuleiro[1][1] == jog) && (tabuleiro[0][2] == jog)) {
                 return 1;
             }
         }
@@ -237,23 +263,85 @@ int verifica_ganhador(char jog){
     return 0;
 }
 
-void imprimir_tabuleiro(){
-    //for (int i = 0; i < 3; i++){
-    //    for (int j = 0; j < 3; j++){
-    //        printf("%c | ", tabuleiro[i][j]);
-    //        if (j == 2){
-    //            printf("\n");
-    //        }
-    //    }
-    //}
-    printf("     [0]   [1]   [2]  \n"); 
-    printf("         |     |     \n");
-    printf("[0]   %c  |  %c  |  %c \n", tabuleiro[0][0], tabuleiro[0][1], tabuleiro[0][2]);
-    printf("    _____|_____|_____\n");
-    printf("         |     |     \n");
-    printf("[1]   %c  |  %c  |  %c \n", tabuleiro[1][0], tabuleiro[1][1], tabuleiro[1][2]);
-    printf("    _____|_____|_____\n");
-    printf("         |     |     \n");
-    printf("[2]   %c  |  %c  |  %c \n", tabuleiro[2][0], tabuleiro[2][1], tabuleiro[2][2]);
-    printf("         |     |     \n\n");
+
+void jogada_computador(char jog, int nivel){
+
+}
+
+
+void imprimir_tabuleiro() {
+    system("cls");
+    printf(" _____________________________________\n");
+    printf("|                                     |\n");
+    printf("|            JOGO DA VELHA            |\n");
+    printf("|_____________________________________|\n");
+    printf("|                                     |\n");
+    printf("|           [0]   [1]   [2]           |\n"); 
+    printf("|          _____ _____ _____          |\n");
+    printf("|         |     |     |     |         |\n");
+    printf("|    [0]  |  %c  |  %c  |  %c  |  [0]    |\n", tabuleiro[0][0], tabuleiro[0][1], tabuleiro[0][2]);
+    printf("|         |_____|_____|_____|         |\n");
+    printf("|         |     |     |     |         |\n");
+    printf("|    [1]  |  %c  |  %c  |  %c  |  [1]    |\n", tabuleiro[1][0], tabuleiro[1][1], tabuleiro[1][2]);
+    printf("|         |_____|_____|_____|         |\n");
+    printf("|         |     |     |     |         |\n");
+    printf("|    [2]  |  %c  |  %c  |  %c  |  [2]    |\n", tabuleiro[2][0], tabuleiro[2][1], tabuleiro[2][2]);
+    printf("|         |_____|_____|_____|         |\n");
+    printf("|                                     |\n");
+    printf("|           [0]   [1]   [2]           |\n"); 
+    printf("|                                     |\n");
+    printf("|_____________________________________|\n\n");
+}
+
+
+int checar_velha() {
+    int count = 0;
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if ((tabuleiro[i][j] == 'O') || (tabuleiro[i][j] == 'X')) {
+                count++;
+            }
+        }
+    }
+
+    if (count == 9) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+
+void tabela_posicoes() {
+    system("cls");
+    printf(" _____________________________________\n");
+    printf("|                                     |\n");
+    printf("|               TUTORIAL              |\n");
+    printf("|_____________________________________|\n");
+    printf("|                                     |\n");
+    printf("|           [0]   [1]   [2]           |\n"); 
+    printf("|          _____ _____ _____          |\n");
+    printf("|         |     |     |     |         |\n");
+    printf("|    [0]  |(0,0)|(0,1)|(0,2)|  [0]    |\n", tabuleiro[0][0], tabuleiro[0][1], tabuleiro[0][2]);
+    printf("|         |_____|_____|_____|         |\n");
+    printf("|         |     |     |     |         |\n");
+    printf("|    [1]  |(1,0)|(1,1)|(1,2)|  [1]    |\n", tabuleiro[1][0], tabuleiro[1][1], tabuleiro[1][2]);
+    printf("|         |_____|_____|_____|         |\n");
+    printf("|         |     |     |     |         |\n");
+    printf("|    [2]  |(2,0)|(2,1)|(2,2)|  [2]    |\n", tabuleiro[2][0], tabuleiro[2][1], tabuleiro[2][2]);
+    printf("|         |_____|_____|_____|         |\n");
+    printf("|                                     |\n");
+    printf("|           [0]   [1]   [2]           |\n"); 
+    printf("|                                     |\n");
+    printf("|_____________________________________|\n\n");    
+
+    printf("\nPressione ENTER para retornar ao menu...");
+    
+    if (getchar() == '\n'){
+        getchar();
+        return;
+    } else {
+        return;;
+    }
 }
