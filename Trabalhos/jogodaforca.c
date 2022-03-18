@@ -17,6 +17,9 @@ void listaPalavras();
 // variavel global de opcao do menu
 int opcao = 0;
 
+// variavel global de vida
+int vida = 6;
+
 // funcao principal
 void main(){
     // chamada da funcao menu e armazenamento de retorno da funcao menu
@@ -91,7 +94,6 @@ void jogadaUsuario(char *palavra_atual, int tam, int *dano){
     // variaveis locais
     char input_usuario = '1';
     char auxiliar[tam];
-    int vida = 6;
     int tamanho_da_palavra = strlen(palavra_atual) + 1;
 
     // declarando ultimo caractere da string auxiliar como \0

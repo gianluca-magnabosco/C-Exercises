@@ -1,5 +1,7 @@
 # include <stdio.h>
 # include <stdlib.h>
+# include <string.h>
+# include <time.h>
 
 int jogada_usuario(int lin, int col, char jog);
 void jogada_computador(char jog, int nivel);
@@ -8,6 +10,10 @@ void escolha_simb(char *jog1, char *jog2);
 void inicializa_velha();
 int verifica_ganhador(char jog);
 
+void bot_basico();
+void bot_intermediario();
+void bot_avancado();
+void solicitar_jogada(int num_jogador, char jog);
 void imprimir_tabuleiro();
 int checar_velha();
 void tabela_posicoes();
@@ -15,43 +21,57 @@ void tabela_posicoes();
 char tabuleiro[3][3];
 int opcao = 0;
 int nivel = 0;
+int ganhou = 0;
+int perdeu = 0;
 char jog1 = ' ';
 char jog2 = ' ';
 char jog = ' ';
+char nivel_computador[14];
 
 
 void main() {
     int opcao_selecionada;
-    int lin = 0;
-    int col = 0;
     int num_jogador = 0;
-    int ganhou = 0;
     int i = 0;
-    int jogada = 0;
     int velha = 0;
 
     opcao_selecionada = menu();
 
     if (opcao_selecionada == 1) {
-        if (nivel == 1) {
-            // bot basico
-            escolha_simb(&jog1, &jog2);
-            inicializa_velha();
+
+        num_jogador = 1;
+
+        escolha_simb(&jog1, &jog2);
+        jog = jog1;
+        inicializa_velha();
+
+        do{
+            solicitar_jogada(1, jog1);
+
+            ganhou = verifica_ganhador(jog1);
+
+            if (ganhou == 1) {
+                break;
+            }
+
             jogada_computador(jog2, nivel);
-        }
-        if (nivel == 2) {
-            // bot intermediario
-            escolha_simb(&jog1, &jog2);
-            inicializa_velha();
-            jogada_computador(jog2, nivel);
-        }
-        if (nivel == 3) {
-            // bot avancado
-            escolha_simb(&jog1, &jog2);
-            inicializa_velha();
-            jogada_computador(jog2, nivel);
-        }
+
+            perdeu = verifica_ganhador(jog2);
+
+            if (perdeu == 1) {
+                imprimir_tabuleiro();
+                break;
+            }
+
+            velha = checar_velha();
+
+            if (velha == 1) {
+                break;
+            }
+
+        } while ((ganhou != 1) || (perdeu == 1));
     }
+
 
     if (opcao_selecionada == 2) {
         escolha_simb(&jog1, &jog2);
@@ -65,73 +85,62 @@ void main() {
                 jog = jog2;
                 num_jogador = 2;
             }
-
             i++;
 
-            do{ 
-                printf("\n");
-                if ((jogada != 1) && (jogada != 2)){
-                    imprimir_tabuleiro();  
-                }
-                printf("\nJogada do jogador %d (%c)\n", num_jogador, jog);
-                printf("\nDigite a posicao correspondente a sua jogada (formato: [linha coluna]): ");
-                scanf("%d %d", &lin, &col);
-
-                // jogada usuario
-                jogada = jogada_usuario(lin, col, jog);
-
-                if (jogada == 1) {
-                    imprimir_tabuleiro();
-                    printf("\n\nEssa posicao nao existe!!!");
-                    printf("\nInsira uma posicao real!\n");
-                }
-                if (jogada == 2) {
-                    imprimir_tabuleiro();
-                    printf("\n\nEssa posicao ja esta preenchida!!!");
-                    printf("\nInsira uma posicao disponivel!\n");
-                }
-            } while (jogada != 0);
-
-
             imprimir_tabuleiro();
+            solicitar_jogada(num_jogador, jog);
 
-        
             ganhou = verifica_ganhador(jog);
             velha = checar_velha();
             
-            if (velha == 1){
+            if (velha == 1) {
                 break;
             }
 
         } while (ganhou != 1);
-
-        if(ganhou == 1) {
-            imprimir_tabuleiro();
-            printf("\n\n\nParabens jogador %d (%c), voce venceu!!!", num_jogador, jog);
-        } 
-
-        if ((velha == 1) && (ganhou != 1)) {
-            imprimir_tabuleiro();
-            printf("\n\n\nDeu velha! Ninguem venceu!");
-        }
-
     } 
+
+    if ((ganhou == 1) && (perdeu != 1)) {
+        imprimir_tabuleiro();
+        printf("\n\nParabens jogador %d (%c), voce venceu!!!\n\n", num_jogador, jog);
+    } 
+
+    if (perdeu == 1) {
+        printf("\n\nVoce perdeu para o computador no nivel %s!!!\n\n", nivel_computador);
+    }
+
+    if ((velha == 1) && (ganhou != 1)) {
+        imprimir_tabuleiro();
+        printf("\n\nDeu velha! Ninguem venceu!\n\n");
+    }
+
 }
 
+// funcao menu
 int menu() {
-    // limpar tela
-    system("cls");
+    int auxiliar = 0;
+    int validar_escolha = 0;
 
     do{
-        // inicio menu
+        // limpar tela
+        system("cls");
         printf("\n\n-----------MENU PRINCIPAL-----------\n");
         printf("1- Jogar contra computador\n");
         printf("2- Jogar contra humano\n");
         printf("3- Ver tabela de posicoes (Tutorial)\n");
+
+        if (auxiliar != 0) {
+            printf("\n\nDigite uma opcao valida!\n\n");
+        }
+
         printf("\nSelecione a opcao desejada: ");
         scanf("%d", &opcao);
+        
 
         if (opcao == 1) {
+
+            auxiliar = 0;
+
             do{
                 system("cls");
                 printf("\n\nEscolhido: Jogar contra computador!\n\n");
@@ -139,23 +148,32 @@ int menu() {
                 printf("1- Nivel basico\n");
                 printf("2- Nivel intermediario\n");
                 printf("3- Nivel avancado\n");
-                printf("Escolha o nivel de dificuldade do computador: ");
+
+                if (validar_escolha != 0) {
+                    printf("\n\nDigite uma opcao valida!\n\n");
+                }
+
+                printf("\nEscolha o nivel de dificuldade do computador: ");
                 scanf("%d", &nivel);
 
+
                 if (nivel == 1) {
-                    printf("\nBot nivel basico\n");
+                    // bot basico 
+                    validar_escolha = 0;
                     break;
                 }
                 if (nivel == 2) {
-                    printf("\nBot nivel intermediario\n");
+                    // bot intermediario
+                    validar_escolha = 0;
                     break;
                 }
                 if (nivel == 3) {
-                    printf("\nBot nivel avancado\n");
+                    // bot avancado
+                    validar_escolha = 0;
                     break;
                 }
                 if ((nivel != 1) && (nivel != 2) && (nivel != 3)) {
-                    printf("\nDigite uma opcao valida!\n\n");
+                    validar_escolha = 1;
                 }
     
             } while ((nivel != 1) || (nivel != 2) || (nivel != 3));
@@ -164,18 +182,19 @@ int menu() {
         }
 
         if (opcao == 2) {
+            auxiliar = 0;
             break;
         }
 
-        if (opcao == 3){
+        if (opcao == 3) {
+            auxiliar = 0;
             tabela_posicoes();
             system("cls");
         }
 
         if ((opcao != 1) && (opcao != 2) && (opcao != 3)) {
-            printf("\nDigite uma opcao valida!\n\n");
+            auxiliar = 1;
         }
-
 
     } while ((opcao != 1) || (opcao != 2));
     
@@ -188,36 +207,48 @@ void inicializa_velha() {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             tabuleiro[i][j] = ' ';
-            printf("%c", tabuleiro[i][j]);
         }
     }
 }
 
 
 void escolha_simb(char *jog1, char *jog2) {
+    
     int escolha = 0;
+    int validar = 0;
+
     do {
         system("cls");
         printf("\n\nEscolha o simbolo desejado para cada jogador: \n");
         printf("1- Jogador 1 (X) vs Jogador 2 (O)\n");
         printf("2- Jogador 1 (O) vs Jogador 2 (X)\n");
+
+        if (nivel != 0) {
+            printf("\nO COMPUTADOR SERA SEMPRE JOGADOR 2!!!\n");
+        }
+
+        if ((validar != 0)) {
+            printf("\n\nDigite uma opcao valida!\n\n");
+        }        
+
         printf("\nInsira uma opcao: ");
         scanf("%d", &escolha);
 
         if (escolha == 1) {
+            validar = 0;
             *jog1 = 'X';
             *jog2 = 'O';
             break;
         }
         if (escolha == 2) {
+            validar = 0;
             *jog1 = 'O';
             *jog2 = 'X';
             break;
         }
 
-
         if ((escolha != 1) && (escolha != 2)) {
-            printf("\nDigite uma opcao valida!\n\n");
+            validar = 1;
         }
 
     } while ((escolha != 1) || (escolha != 2));
@@ -230,7 +261,7 @@ int jogada_usuario(int lin, int col, char jog) {
         return 2;
     }  
 
-    if ((lin > 2) || (lin < 0) || (col < 0) || (col > 2)) {
+    if ((lin < 0) || (lin > 2) || (col < 0) || (col > 2)) {
         return 1;
     }
 
@@ -264,14 +295,111 @@ int verifica_ganhador(char jog) {
 }
 
 
-void jogada_computador(char jog, int nivel){
+void jogada_computador(char jog, int nivel) {
+
+    ///////////////// fazer bots
+    if (nivel == 1) {
+        strcpy(nivel_computador, "basico");
+        bot_basico();
+    }
+
+    if (nivel == 2) {
+        strcpy(nivel_computador, "intermediario");
+        bot_intermediario();
+    }
+
+    if (nivel == 3) {
+        strcpy(nivel_computador, "avancado");
+        bot_avancado();
+    }
+
+    perdeu = verifica_ganhador(jog);
 
 }
 
 
+void bot_basico() {
+    int lin = 0;
+    int col = 0;
+    int jogada = 0;
+
+    // fazer
+    do{ 
+        imprimir_tabuleiro();
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if ((tabuleiro[i][j] != 'O') && (tabuleiro[i][j] != 'X')) {
+                    lin = i;
+                    col = j;
+
+                    if ((tabuleiro[i][j] == jog1) || (tabuleiro[i][j+1] == jog1) || (tabuleiro[i][j+2] == jog1)) {
+                        if ((tabuleiro[i][j] != 'O') && (tabuleiro[i][j] != 'X')) {
+                            tabuleiro[i][j] = jog2;
+                            break;
+                        }
+                        
+                    } else {
+                        if (i != 2) {
+                            i++;
+                        } else {
+                            i--;
+                        }
+                    } 
+
+                    lin = i;
+                    col = j;
+                    //if ((tabuleiro[i][j] != jog1) || (tabuleiro[i][j] == ' ')) {
+                    //
+                    //    if ((tabuleiro[i][j+1] == ' ') || (tabuleiro[i][j+1] != jog1)) {
+                    //
+                    //        
+                    //        if ((tabuleiro[i][j+2] == ' ') || (tabuleiro[i][j+2] != jog1)) {
+                    //            lin = i;
+                    //            col = j;
+                    //        }
+                    //    }
+                    //
+                    //}
+
+
+                }
+            }
+            break;
+        }
+
+        //do{
+        //    srand(time(0));
+        //    lin = (rand() % 120) % 3;            
+        //} while ((lin > 2) && ((tabuleiro[lin][0] == ' ') || (tabuleiro[lin][1] == ' ') || (tabuleiro[lin][2] == ' ')));
+        //
+        //do{
+        //    srand(time(0));
+        //    col = (rand() % 180) % 3;            
+        //} while ((col > 2) && (tabuleiro[lin][col] == ' '));
+
+
+        // jogada usuario
+        jogada = jogada_usuario(lin, col, jog2);
+
+    } while (jogada != 0);
+}
+
+
+void bot_intermediario() {
+    // fazer
+}
+
+
+void bot_avancado() {
+    // fazer
+}
+
+
+
 void imprimir_tabuleiro() {
     system("cls");
-    printf(" _____________________________________\n");
+    printf("\n _____________________________________\n");
     printf("|                                     |\n");
     printf("|            JOGO DA VELHA            |\n");
     printf("|_____________________________________|\n");
@@ -295,6 +423,7 @@ void imprimir_tabuleiro() {
 
 
 int checar_velha() {
+
     int count = 0;
 
     for (int i = 0; i < 3; i++) {
@@ -315,7 +444,7 @@ int checar_velha() {
 
 void tabela_posicoes() {
     system("cls");
-    printf(" _____________________________________\n");
+    printf("\n _____________________________________\n");
     printf("|                                     |\n");
     printf("|               TUTORIAL              |\n");
     printf("|_____________________________________|\n");
@@ -338,10 +467,41 @@ void tabela_posicoes() {
 
     printf("\nPressione ENTER para retornar ao menu...");
     
-    if (getchar() == '\n'){
+    if (getchar() == '\n') {
         getchar();
         return;
     } else {
-        return;;
+        return;
     }
+}
+
+
+void solicitar_jogada(int num_jogador, char jog) {
+
+    int jogada = 0;
+    int lin = 3;
+    int col = 3;
+    
+    do{ 
+        if ((jogada != 1) && (jogada != 2)) {
+            imprimir_tabuleiro();  
+        }
+        printf("\nJOGADA DO JOGADOR %d (%c)\n", num_jogador, jog);
+        printf("\nDigite a posicao correspondente a sua jogada (formato: [linha coluna]): ");
+        scanf("%d %d", &lin, &col);
+
+        // jogada usuario
+        jogada = jogada_usuario(lin, col, jog);
+
+        if (jogada == 1) {
+            imprimir_tabuleiro();
+            printf("\nEssa posicao nao existe!!!");
+            printf("\nInsira uma posicao real!\n\n");
+        }
+        if (jogada == 2) {
+            imprimir_tabuleiro();
+            printf("\nEssa posicao ja esta preenchida!!!");
+            printf("\nInsira uma posicao disponivel!\n\n");
+        }
+    } while (jogada != 0);
 }
