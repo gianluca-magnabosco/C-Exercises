@@ -124,6 +124,7 @@ int menu() {
     do{
         // limpar tela
         system("cls");
+        printf("\033[H\033[J");
         printf("\n\n-----------MENU PRINCIPAL-----------\n");
         printf("1- Jogar contra computador\n");
         printf("2- Jogar contra humano\n");
@@ -143,6 +144,7 @@ int menu() {
 
             do{
                 system("cls");
+                printf("\033[H\033[J");
                 printf("\n\nEscolhido: Jogar contra computador!\n\n");
                 printf("Niveis de dificuldade do computador:\n");
                 printf("1- Nivel basico\n");
@@ -190,6 +192,7 @@ int menu() {
             auxiliar = 0;
             tabela_posicoes();
             system("cls");
+            printf("\033[H\033[J");
         }
 
         if ((opcao != 1) && (opcao != 2) && (opcao != 3)) {
@@ -219,6 +222,7 @@ void escolha_simb(char *jog1, char *jog2) {
 
     do {
         system("cls");
+        printf("\033[H\033[J");
         printf("\n\nEscolha o simbolo desejado para cada jogador: \n");
         printf("1- Jogador 1 (X) vs Jogador 2 (O)\n");
         printf("2- Jogador 1 (O) vs Jogador 2 (X)\n");
@@ -399,6 +403,7 @@ void bot_avancado() {
 
 void imprimir_tabuleiro() {
     system("cls");
+    printf("\033[H\033[J");
     printf("\n _____________________________________\n");
     printf("|                                     |\n");
     printf("|            JOGO DA VELHA            |\n");
@@ -444,6 +449,7 @@ int checar_velha() {
 
 void tabela_posicoes() {
     system("cls");
+    printf("\033[H\033[J");
     printf("\n _____________________________________\n");
     printf("|                                     |\n");
     printf("|               TUTORIAL              |\n");
@@ -452,13 +458,13 @@ void tabela_posicoes() {
     printf("|           [0]   [1]   [2]           |\n"); 
     printf("|          _____ _____ _____          |\n");
     printf("|         |     |     |     |         |\n");
-    printf("|    [0]  |(0,0)|(0,1)|(0,2)|  [0]    |\n", tabuleiro[0][0], tabuleiro[0][1], tabuleiro[0][2]);
+    printf("|    [0]  |(0,0)|(0,1)|(0,2)|  [0]    |\n");
     printf("|         |_____|_____|_____|         |\n");
     printf("|         |     |     |     |         |\n");
-    printf("|    [1]  |(1,0)|(1,1)|(1,2)|  [1]    |\n", tabuleiro[1][0], tabuleiro[1][1], tabuleiro[1][2]);
+    printf("|    [1]  |(1,0)|(1,1)|(1,2)|  [1]    |\n");
     printf("|         |_____|_____|_____|         |\n");
     printf("|         |     |     |     |         |\n");
-    printf("|    [2]  |(2,0)|(2,1)|(2,2)|  [2]    |\n", tabuleiro[2][0], tabuleiro[2][1], tabuleiro[2][2]);
+    printf("|    [2]  |(2,0)|(2,1)|(2,2)|  [2]    |\n");
     printf("|         |_____|_____|_____|         |\n");
     printf("|                                     |\n");
     printf("|           [0]   [1]   [2]           |\n"); 
