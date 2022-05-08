@@ -26,7 +26,7 @@ void main(){
     int opcao_escolhida = menu();
     
     // opcao 3 do menu cai aqui
-    system("cls");
+    printf("\033[H\033[J");
     printf("\n\nJogo encerrado!");
     printf("\nVolte sempre!!!\n\n");
     system("pause");
@@ -35,7 +35,7 @@ void main(){
 
 int menu(){
     // limpar tela
-    system("cls");
+    printf("\033[H\033[J");
 
     // inicio menu
     printf("\n\n-----------MENU PRINCIPAL-----------\n");
@@ -102,21 +102,32 @@ void jogadaUsuario(char *palavra_atual, int tam, int *dano){
     // loop de conferencia e mostragem do estado atual do jogo
     do{
         // mostragem
-        system("cls");
-        printf("\nEscolha uma letra ou insira '1' para sair.\n");
-        printf("\nPalavra: \n\n\n");
-
+        printf("\033[H\033[J");
+        printf("\n _____________________________________________\n");
+        printf("|                                             |\n");
+        printf("|                JOGO DA FORCA                |\n");
+        printf("|_____________________________________________|\n");
+        printf("|                                             |\n");
+        printf("| Escolha uma letra ou insira '1' para sair.  |\n");
+        printf("|                                             |\n");
+        printf("|                                             |\n");
+        printf("|   Palavra:                                  |\n");
+        printf("|                                             |\n");
+        printf("|        ");
         // mostrar palavra de acordo com as letras ja acertadas
         for (int i = 0; i < tamanho_da_palavra; i++){
             if (auxiliar[i] == palavra_atual[i]){
                 printf("%c ", toupper(auxiliar[i]));
-            }else{
+            } else{
                 printf("__ ");
             }
         }
 
+        printf("\n|                                             |\n");
+        printf("|                                             |\n");
+        printf("|                                             |\n");
         // mostrar barra de vida de acordo com numero de vidas
-        printf("\n\n\nVida: [");
+        printf("|  Vida: [");
         for (int i = 0; i <= (vida * 4); i++){
             if (vida == 0){
                 printf(" ");
@@ -128,7 +139,10 @@ void jogadaUsuario(char *palavra_atual, int tam, int *dano){
         for (int i = (vida * 4); i < 24; i++){
             printf(" ");
         }
-        printf("] %d vidas\n", vida);
+        printf("] %d vidas  |\n", vida);
+        printf("|                                             |\n");
+        printf("|                                             |\n");
+        printf("|_____________________________________________|\n\n");
 
 
         // conferencia se string auxiliar = palavra atual, se for encerra o jogo e mostra que venceu
@@ -136,6 +150,7 @@ void jogadaUsuario(char *palavra_atual, int tam, int *dano){
             printf("\n\nParabens!!!!!!!\n");
             printf("Voce venceu!!!\n");
             printf("A palavra era: %s.\n\n", palavra_atual);
+            vida = 6;
             break;
         }
 
@@ -144,6 +159,7 @@ void jogadaUsuario(char *palavra_atual, int tam, int *dano){
             printf("\n\nGAME OVER\n");
             printf("Voce perdeu!\n");
             printf("A palavra era: %s.\n\n", palavra_atual);
+            vida = 6;
             break;
         }
 
@@ -205,7 +221,7 @@ void gerarNumeroAleatorio(int *px){
 void listaPalavras(){
     int i = 1;
     
-    system("cls");
+    printf("\033[H\033[J");
 
     printf("\n----------------------------------------------------\n");
     printf("Lista de todas as palavras disponiveis nesse jogo: \n");

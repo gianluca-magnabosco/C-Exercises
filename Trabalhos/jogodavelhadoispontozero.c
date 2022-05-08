@@ -1,6 +1,7 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
+# include <ctype.h>
 
 # define CLEARSCREEN  "\033[H\033[J"
 
@@ -22,6 +23,24 @@ void imprimir_tabuleiro();
 int checar_velha();
 void tabela_posicoes();
 
+
+
+typedef struct Velha { 
+    int partida;
+    char JogVelha[3][3];
+    char resultado;
+} Partida;
+
+void grava_txt(char *nome_jogador1, char jog1, char *nome_jogador2, char jog2);
+int grava_binario(char *arquivo_atual, Partida atual);
+Partida le_registro_arquivo_binario(char *arquivo_atual, int num_partida);
+void le_arquivo_binario();
+
+void deleta_arquivos();
+
+
+
+
 char tabuleiro[3][3];
 int opcao = 0;
 int nivel = 0;
@@ -38,6 +57,10 @@ void main() {
     int num_jogador = 0;
     int i = 0;
     int velha = 0;
+    int partida_atual = 0;
+
+    char nome_arquivo[19] = "arquivo_binario.dat";
+    nome_arquivo[19] = '\0';
 
     opcao_selecionada = menu();
 
@@ -87,9 +110,96 @@ void main() {
 
 
     if (opcao_selecionada == 2) {
-        escolha_simb(&jog1, &jog2);
-        inicializa_velha();
+        char nome_jogador1[50];
+        char nome_jogador2[50];
 
+        char jogador1[50];
+        int i = 0;
+        char jogador2[50];
+        int j = 0;
+        char auxiliar = ' ';
+
+        printf(CLEARSCREEN);
+
+        FILE *arquivo_binario;
+        arquivo_binario = fopen(nome_arquivo, "rb");
+        Partida atual;
+
+        if (arquivo_binario == NULL) {
+            partida_atual = 1;
+        } else {
+            partida_atual = 1;
+            while(!feof(arquivo_binario)) {
+            
+                fread(&atual, sizeof(Partida), 1, arquivo_binario);
+                
+                if (!feof(arquivo_binario)) {
+                    partida_atual++;
+                } else {
+                    fclose(arquivo_binario);
+                    break;
+                }
+            }
+        }
+
+
+        FILE *arquivo_atual;
+        arquivo_atual = fopen("nomes_simbolos.txt", "r+");
+
+        if (arquivo_atual == NULL) {
+            printf("\nInsira o nome do jogador numero 1: ");
+            gets(nome_jogador1);
+            nome_jogador1[strlen(nome_jogador1)] = '\0';
+
+            printf("\nInsira o nome do jogador numero 2: ");
+            gets(nome_jogador2);
+            nome_jogador2[strlen(nome_jogador2)] = '\0';
+
+            escolha_simb(&jog1, &jog2);
+
+            grava_txt(nome_jogador1, jog1, nome_jogador2, jog2);
+        } else {
+            while (1) {
+                auxiliar = fgetc(arquivo_atual);
+                if (auxiliar != ';') {
+                    jogador1[i] = auxiliar;
+                    printf("%c", jogador1[i]);
+                    i++;
+                } else {
+                    break;
+                }
+            }
+            jogador1[strlen(jogador1)] = '\0';
+        
+            fseek(arquivo_atual, 1, SEEK_CUR);
+            jog1 = fgetc(arquivo_atual);
+            
+            fseek(arquivo_atual, 2, SEEK_CUR);
+
+            while (1) {
+                auxiliar = fgetc(arquivo_atual);
+                if (auxiliar != ';') {
+                    jogador2[j] = auxiliar;
+                    printf("%c", jogador2[i]);
+                    j++;
+                } else {
+                    break;
+                }
+            }
+            jogador2[strlen(jogador2)] = '\0';
+
+            fseek(arquivo_atual, 1, SEEK_CUR);
+            jog2 = fgetc(arquivo_atual);
+            printf("%c", jog2);
+
+            if (fclose(arquivo_atual) != 0) {
+                printf("Erro!");
+                return;
+            }
+        }
+
+        inicializa_velha();
+        i = 0;
         do{
             if (i % 2 == 0) {
                 jog = jog1;
@@ -119,6 +229,33 @@ void main() {
         if (nivel != 0) {
             printf("Contra o computador no nivel %s!!!\n\n", nivel_computador);
         }
+
+        if (nivel == 0) {
+            Partida atual;
+            atual.partida = partida_atual;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    atual.JogVelha[i][j] = tabuleiro[i][j];
+                }
+            }
+            atual.resultado = jog;
+
+            if (grava_binario(nome_arquivo, atual) == 0) {
+                printf("\nErro na gravacao do arquivo!\n");
+            } else {
+                printf("\nO registro foi gravado no arquivo com sucesso!\n");
+            }
+
+
+
+            printf("\nPressione ENTER para retornar ao menu...");
+            
+            if (getchar() == '\n') {
+                getchar();
+            } 
+
+            main();
+        }
     } 
 
     if (perdeu == 1) {
@@ -129,6 +266,31 @@ void main() {
     if ((velha == 1) && (ganhou != 1)) {
         imprimir_tabuleiro();
         printf("\n\nDeu velha! Ninguem venceu!\n\n");
+        
+        if (nivel == 0) {
+            Partida atual;
+            atual.partida = partida_atual;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    atual.JogVelha[i][j] = tabuleiro[i][j];
+                }
+            }
+        
+            atual.resultado = 'V';
+            if (grava_binario(nome_arquivo, atual) == 0) {
+                printf("\nErro na gravacao do arquivo!\n");
+            } else {
+                printf("\nArquivo gravado com sucesso!\n");
+            }
+
+            printf("\nPressione ENTER para retornar ao menu...");
+            
+            if (getchar() == '\n') {
+                getchar();
+            } 
+
+            main();
+        }
     }
 
 }
@@ -137,22 +299,29 @@ void main() {
 int menu() {
     int auxiliar = 0;
     int validar_escolha = 0;
+    
+    int num_partida = 0;
+    char nome_arquivo[19] = "arquivo_binario.dat";
+    nome_arquivo[19] = '\0';
 
     do{
         // limpar tela
 
         printf(CLEARSCREEN);
-        printf("\n\n-----------MENU PRINCIPAL-----------\n");
+        printf("\n\n---------------------MENU PRINCIPAL---------------------\n");
         printf("1- Jogar contra computador\n");
         printf("2- Jogar contra humano\n");
         printf("3- Ver tabela de posicoes (Tutorial)\n");
+        printf("4- Ler uma partida (registro) do arquivo binario\n");
+        printf("5- Imprimir todas as partidas e o vencedor do campeonato\n");
+        printf("6- Sair do jogo e apagar arquivos do campeonato atual\n");
 
         if (auxiliar != 0) {
             printf("\n\nDigite uma opcao valida!\n\n");
         }
 
         printf("\nSelecione a opcao desejada: ");
-        scanf("%d", &opcao);
+        scanf("%d%*c", &opcao);
         
 
         if (opcao == 1) {
@@ -160,8 +329,8 @@ int menu() {
             auxiliar = 0;
 
             do{
-        
                 printf(CLEARSCREEN);
+
                 printf("\n\nEscolhido: Jogar contra computador!\n\n");
                 printf("Niveis de dificuldade do computador:\n");
                 printf("1- Nivel basico\n");
@@ -212,7 +381,90 @@ int menu() {
             printf(CLEARSCREEN);
         }
 
-        if ((opcao != 1) && (opcao != 2) && (opcao != 3)) {
+        if (opcao == 4) {
+            auxiliar = 0;
+            printf(CLEARSCREEN);
+
+            printf("Insira o numero da partida que deseja ler: ");
+            scanf("%d", &num_partida);
+
+            Partida atual = le_registro_arquivo_binario(nome_arquivo, num_partida);
+            
+            printf(" _______________________________\n");
+            printf("|                               |\n");
+            printf("|          Partida: %d", atual.partida);
+            if (atual.partida < 10) {
+                printf(" ");
+            }
+            printf("          |\n");
+            printf("|_______________________________|\n");
+            printf("|                               |\n");
+            printf("|          Tabuleiro:           |\n");
+            for (int i = 0; i < 3; i++) {
+                if (i == 0) {
+                    printf("|          ___________          |");
+                }
+                printf("\n|         |   |   |   |         |\n");
+                printf("|         |");
+                for (int j = 0; j < 3; j++) {
+                    printf(" %c |", atual.JogVelha[i][j]);
+                    if (j == 2) {
+                        printf("         |");
+                    }
+                }
+                printf("\n|         |___|___|___|         |");
+            }
+
+            printf("\n|_______________________________|\n");
+            printf("|                               |\n");
+            if (atual.resultado != 'V') {
+                printf("|          Vencedor: %c          |\n", atual.resultado);
+                printf("|_______________________________|\n");
+            } else {
+                printf("|          Deu velha!           |\n");
+                printf("|_______________________________|\n");
+            }
+
+
+
+            printf("\nPressione ENTER para retornar ao menu...");
+            
+            if (getchar() == '\n') {
+                getchar();
+            } 
+
+            printf(CLEARSCREEN);
+        }
+
+        if (opcao == 5) {
+            auxiliar = 0;
+            printf(CLEARSCREEN);
+            le_arquivo_binario();
+
+            printf("\nPressione ENTER para retornar ao menu...");
+            
+            if (getchar() == '\n') {
+                getchar();
+            } 
+
+            printf(CLEARSCREEN);
+        }
+
+        if (opcao == 6) {
+            auxiliar = 0;
+            printf(CLEARSCREEN);
+
+            deleta_arquivos();
+            printf("\n ______________________________________________");
+            printf("\n|                                              |");
+            printf("\n|              Programa encerrado!             |");
+            printf("\n|                  Volte sempre!               |");
+            printf("\n|______________________________________________|\n\n");
+
+            exit(1);
+        }
+
+        if ((opcao != 1) && (opcao != 2) && (opcao != 3) && (opcao != 4) && (opcao != 5) && (opcao != 6)) {
             auxiliar = 1;
         }
 
@@ -1019,7 +1271,6 @@ void tabela_posicoes() {
         getchar();
         return;
     } else {
-        getchar();
         return;
     }
 }
@@ -1053,4 +1304,466 @@ void solicitar_jogada(int num_jogador, char jog) {
             printf("\nInsira uma posicao disponivel!\n\n");
         }
     } while (jogada != 0);
+}
+
+
+
+void grava_txt(char *nome_jogador1, char jog1, char *nome_jogador2, char jog2) {
+    FILE *nomes_simbolos; 
+    nomes_simbolos = fopen("nomes_simbolos.txt", "w+");
+
+    if (nomes_simbolos == NULL) {
+        printf("Erro ao abrir arquivo!");
+        exit(1);
+    } 
+
+    fprintf(nomes_simbolos, "%s", nome_jogador1);
+    fprintf(nomes_simbolos, "%s", "; ");
+    fprintf(nomes_simbolos, "%c", jog1);
+    fprintf(nomes_simbolos, "%s", "; ");
+    fprintf(nomes_simbolos, "%s", nome_jogador2);
+    fprintf(nomes_simbolos, "%s", "; ");
+    fprintf(nomes_simbolos, "%c", jog2);
+    fprintf(nomes_simbolos, "%s", ".");
+
+    if (fclose(nomes_simbolos) != 0) {
+        printf("Erro!");
+        return;
+    }
+}
+
+
+int grava_binario(char *arquivo_atual, Partida atual) {
+    FILE *arquivo_binario;
+    arquivo_binario = fopen(arquivo_atual, "a + b");
+
+    if (arquivo_binario == NULL) {
+        return 0;
+    } else {
+
+        if (fwrite(&atual, 1, sizeof(Partida), arquivo_binario) != sizeof(Partida)) {
+            return 0;
+        }
+        
+        if (fclose(arquivo_binario) != 0) {
+            printf("Erro!");
+            return 0;
+        }
+
+        return 1;
+    }
+}
+
+
+Partida le_registro_arquivo_binario(char *arquivo_atual, int num_partida) {
+    printf(CLEARSCREEN);
+    Partida atual;
+    
+    FILE *arquivo_binario;
+    arquivo_binario = fopen(arquivo_atual, "r + b");
+
+    if (arquivo_binario == NULL) {
+        printf("\nERRO AO ABRIR ARQUIVO BINARIO, CERTIFIQUE-SE DE QUE ELE EXISTE E SE ENCONTRA NA PASTA ATUAL!\n\n");    
+        exit(1);
+    } 
+    
+    num_partida -= 1;
+
+    fseek(arquivo_binario, num_partida * sizeof(Partida), SEEK_SET);
+    fread(&atual, sizeof(Partida), 1, arquivo_binario);
+    
+    if (feof(arquivo_binario)) {
+        printf("Registro nao encontrado!\n");
+        exit(1);
+    }
+
+    if (fclose(arquivo_binario) != 0) {
+        printf("Erro!");
+        exit(1);
+    } 
+    
+    return atual;
+}
+
+
+void le_arquivo_binario() {
+    char jogador1[50] = {'\0'};
+    int i = 0;
+    char jogador2[50] = {'\0'};
+    int j = 0;
+    char simbolo_jogador1 = ' ';
+    char simbolo_jogador2 = ' ';
+    char auxiliar = ' ';
+
+    int maior_string = 0;
+
+    int vitorias_jogador1 = 0;
+    int vitorias_jogador2 = 0;
+    int velha = 0;
+
+    int valida = 0;
+    int tamanho_reduzido = 0;
+    int tamanho_total = 0;
+    int tamanho_parcial = 0;
+    int maior_tamanho = 0;
+    int menor_tamanho = 0;
+
+    FILE *arquivo_txt;
+    arquivo_txt = fopen("nomes_simbolos.txt", "r+");
+
+    if (arquivo_txt == NULL) {
+        printf("\nERRO AO ABRIR ARQUIVO TEXTO, CERTIFIQUE-SE DE QUE ELE EXISTE E SE ENCONTRA NA PASTA ATUAL!\n\n");  
+        exit(1);
+    }
+
+    while (1) {
+        auxiliar = fgetc(arquivo_txt);
+        if (auxiliar != ';') {
+            jogador1[i] = auxiliar;
+            i++;
+        } else {
+            break;
+        }
+    }
+  
+    fseek(arquivo_txt, 1, SEEK_CUR);
+    simbolo_jogador1 = fgetc(arquivo_txt);
+    
+    fseek(arquivo_txt, 2, SEEK_CUR);
+
+    while (1) {
+        auxiliar = fgetc(arquivo_txt);
+        if (auxiliar != ';') {
+            jogador2[j] = auxiliar;
+            j++;
+        } else {
+            break;
+        }
+    }
+
+    fseek(arquivo_txt, 1, SEEK_CUR);
+    simbolo_jogador2 = fgetc(arquivo_txt);
+
+    if (fclose(arquivo_txt) != 0) {
+        printf("Erro!");
+        return;
+    }
+
+
+    FILE *arquivo_binario;
+
+    i = 0;
+    Partida atual;
+
+    arquivo_binario = fopen("arquivo_binario.dat", "r + b");
+
+
+    if (arquivo_binario == NULL) {
+        printf("\nERRO AO ABRIR ARQUIVO BINARIO, CERTIFIQUE-SE DE QUE ELE EXISTE E SE ENCONTRA NA PASTA ATUAL!\n\n");  
+        exit(1);
+    }
+    
+    while(!feof(arquivo_binario)) {
+        
+        fread(&atual, sizeof(Partida), 1, arquivo_binario);
+
+        if (feof(arquivo_binario)) {
+            break;
+        }
+        if (atual.partida == 1) {
+            printf("_________________________________\n\n");
+        }
+        printf(" _______________________________\n");
+        printf("|                               |\n");
+        printf("|          Partida: %d", atual.partida);
+        if (atual.partida < 10) {
+            printf(" ");
+        }
+        printf("          |\n");
+        printf("|_______________________________|\n");
+        printf("|                               |\n");
+        printf("|          Tabuleiro:           |\n");
+        for (int i = 0; i < 3; i++) {
+            if (i == 0) {
+                printf("|          ___________          |");
+            }
+            printf("\n|         |   |   |   |         |\n");
+            printf("|         |");
+            for (int j = 0; j < 3; j++) {
+                printf(" %c |", atual.JogVelha[i][j]);
+                if (j == 2) {
+                    printf("         |");
+                }
+            }
+            printf("\n|         |___|___|___|         |");
+        }
+
+        printf("\n|_______________________________|\n");
+        printf("|                               |\n");
+        if (atual.resultado != 'V') {
+            printf("|          Vencedor: %c          |\n", atual.resultado);
+            printf("|_______________________________|\n");
+        } else {
+            printf("|          Deu velha!           |\n");
+            printf("|_______________________________|\n");
+        }
+        
+        if (atual.resultado == simbolo_jogador1) {
+            printf("\nPartida: %d\nVencedor: %s\n\n", atual.partida, jogador1);
+        } 
+        if (atual.resultado == simbolo_jogador2) {
+            printf("\nPartida: %d\nVencedor: %s\n\n", atual.partida, jogador2);
+        }
+        if (atual.resultado == 'V') {
+            printf("\nPartida: %d\nDeu velha!\n\n", atual.partida);
+        }
+        printf("_________________________________\n\n");
+
+
+        if (atual.resultado == simbolo_jogador1) {
+            vitorias_jogador1++;
+        } 
+        if (atual.resultado == simbolo_jogador2) {
+            vitorias_jogador2++;
+        }
+        if (atual.resultado == 'V') {
+            velha++;
+        }
+    }
+    
+
+
+
+    /////////////////////////////////// INTERFACE ////////////////////////////////////////////
+
+    if (strlen(jogador1) > strlen(jogador2)) {
+        maior_string = strlen(jogador1);
+        tamanho_reduzido = maior_string - strlen(jogador2);
+        valida = 1;
+    } else {
+        maior_string = strlen(jogador2);
+        tamanho_reduzido = maior_string - strlen(jogador1);
+        valida = 0;
+    }
+
+
+    printf("\n");
+    printf("\n ____________________________");
+    for (i = 0; i < maior_string; i++){
+        printf("_");
+    }
+    printf(" ");
+
+
+    printf("\n|                            ");
+    for (i = 0; i < maior_string; i++){
+        printf(" ");
+    }
+    printf("|");
+
+
+    printf("\n|        ");
+    for (i = 0; i < (maior_string / 2); i++){
+        printf(" ");
+    }
+    if (maior_string % 2 != 0) { 
+        printf(" ");
+    }
+    printf("Placar final:");
+    for (i = 0; i < (maior_string / 2); i++){
+        printf(" ");
+    }    
+    printf("       |");
+
+
+    printf("\n|____________________________");
+    for (i = 0; i < maior_string; i++){
+        printf("_");
+    }
+    printf("|");
+
+
+    printf("\n|                            ");
+    for (i = 0; i < maior_string; i++){
+        printf(" ");
+    }
+    printf("|");
+
+
+    tamanho_total = 30 + maior_string;
+    tamanho_parcial = 4 + maior_string + 12;
+    maior_tamanho = tamanho_total - tamanho_parcial - 2;
+    menor_tamanho = tamanho_total - tamanho_parcial - 2 + tamanho_reduzido;
+
+
+    printf("\n|    %s: ", jogador1);
+    printf("%d vitorias", vitorias_jogador1);
+    i = 0;
+    if (valida == 1) {
+        do {
+            printf(" ");
+            i++;
+        } while (i != (maior_tamanho - 1));
+    } else {
+        do {
+            printf(" ");
+            i++;
+        } while (i != (menor_tamanho - 1));        
+    }
+    if (vitorias_jogador1 < 10) {
+        printf(" ");
+    }
+    printf("|");
+
+    printf("\n|                            ");
+    for (i = 0; i < maior_string; i++){
+        printf(" ");
+    }
+    printf("|");
+
+
+    printf("\n|    %s: ", jogador2);
+    printf("%d vitorias", vitorias_jogador2);
+    i = 0;
+
+    if (valida == 0) {
+        do {
+            printf(" ");
+            i++;
+        } while (i != (maior_tamanho - 1));
+    } else {
+        do {
+            printf(" ");
+            i++;
+        } while (i != (menor_tamanho - 1));        
+    }
+
+    if (vitorias_jogador2 < 10) {
+        printf(" ");
+    }
+    printf("|");
+
+
+
+    printf("\n|                            ");
+    for (i = 0; i < maior_string; i++){
+        printf(" ");
+    }
+    printf("|");
+
+
+    printf("\n|          ");
+    for (i = 0; i < (maior_string / 2); i++){
+        printf(" ");
+    }
+    if (maior_string % 2 != 0) { 
+        printf(" ");
+    }
+    printf("%d velhas", velha);
+    for (i = 0; i < (maior_string / 2); i++){
+        printf(" ");
+    }
+    if (velha < 10) {
+        printf(" ");
+    }    
+    printf("         |");
+
+
+    printf("\n|____________________________");
+    for (i = 0; i < maior_string; i++){
+        printf("_");
+    }
+    printf("|\n\n");
+
+    
+
+
+
+
+
+
+
+    ///////////////////////////////////////// VALIDA E MOSTRA GANHADOR //////////////////////////////////////////////
+    if (vitorias_jogador1 > vitorias_jogador2) {
+        i = 0;
+        printf("\n ________________________________________________________");
+        do {
+            printf("_");
+            i++;
+        } while (jogador1[i] != '\0');
+        printf(" ");
+
+        i = 0;
+        printf("\n|                                                        ");
+        do {
+            printf(" ");
+            i++;
+        } while (jogador1[i] != '\0');
+        printf("|");
+
+        printf("\n| Parabens %s voce venceu o Campeonato de Jogo da Velha!!! |", jogador1);
+
+        i = 0;
+        printf("\n|________________________________________________________");
+        do {
+            printf("_");
+            i++;
+        } while (jogador1[i] != '\0');
+        printf("|\n\n");
+    }
+
+    if (vitorias_jogador1 < vitorias_jogador2) {
+        i = 0;
+        printf("\n ________________________________________________________");
+        do {
+            printf("_");
+            i++;
+        } while (jogador2[i] != '\0');
+        printf(" ");
+
+        i = 0;
+        printf("\n|                                                        ");
+        do {
+            printf(" ");
+            i++;
+        } while (jogador2[i] != '\0');
+        printf("|");
+
+        printf("\n| Parabens %s voce venceu o Campeonato de Jogo da Velha!!! |", jogador2);
+
+        i = 0;
+        printf("\n|________________________________________________________");
+        do {
+            printf("_");
+            i++;
+        } while (jogador2[i] != '\0');
+        printf("|\n\n");
+    }
+
+    if (vitorias_jogador1 == vitorias_jogador2) {
+        printf("\n ______________________________________________");
+        printf("\n|                                              |");
+        printf("\n|     O campeonato resultou em um empate!!!    |");
+        printf("\n|______________________________________________|\n\n");
+    }
+
+    if (fclose(arquivo_binario) != 0) {
+        printf("Erro!");
+        return;
+    }
+}
+
+
+void deleta_arquivos() {
+    if (remove("arquivo_binario.dat") == 0) {
+        printf("\nArquivo binario deletado com sucesso\n");
+    } else {
+        printf("\nErro ao deletar arquivo binario!\n");
+    }
+
+    if (remove("nomes_simbolos.txt") == 0) {
+        printf("\nArquivo texto deletado com sucesso\n");
+    } else {
+        printf("\nErro ao deletar arquivo texto!\n");
+    }
 }
